@@ -72,6 +72,17 @@ namespace AgarioProject
                 SpawnDots();
                 spawnTimer = 10;
             }
+
+            foreach (PictureBox item in dots.ToList())
+            {
+                if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
+                {
+                    dots.Remove(item);
+                    this.Controls.Remove(item);
+
+                }
+            }
+
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
