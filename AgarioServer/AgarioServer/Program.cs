@@ -1,14 +1,10 @@
 ﻿using System.Net.Sockets;
 using System.Net;
-using AgarioServer;
 
 TcpListener server = new TcpListener(IPAddress.Any, 12000);
 server.Start();
 Console.WriteLine("Server started... listening on port 12000");
 List<TcpClient> allClients = new List<TcpClient>();
-List<Player> allPlayers = new List<Player>();
-List<Food> allFood = new List<Food>();
-
 
 while (true)
 {
@@ -30,52 +26,42 @@ void MessageAll(string message)
 void HandleClient(TcpClient client)
 {
     Guid clientId = Guid.NewGuid();
-    string name = ""; // Placeholder for player name
-    Player player = new Player(clientId, name);
+    Console.WriteLine($"Client {clientId} connected.");
+    allClients.Add(client);
+    // Send client name to the client
 
     StreamWriter writer = new StreamWriter(client.GetStream());
-    StreamReader reader = new StreamReader(client.GetStream());
 
     writer.WriteLine("What is your name?");
     writer.Flush();
-    player.Name = reader.ReadLine();
 
-    allClients.Add(client);
-    allPlayers.Add(player); // Add player to the game
+    // Receive and send messages
+    StreamReader reader = new StreamReader(client.GetStream());
+    string name = reader.ReadLine();
 
-    while (client.Connected)
+    try
     {
-        string message = reader.ReadLine();
-        if (message != null)
+        while (client.Connected)
         {
-            // Parse message for movement data
-            var parts = message.Split(':');
-            if (parts[0] == "MOVE") // Example: MOVE:up
+            string message = reader.ReadLine();
+            if (message != null)
             {
-                string direction = parts[1].Trim();
-                //UpdatePlayerPosition(player, direction);
-            }
+                Console.WriteLine($"Received message from {name}: {message}");
+                MessageAll(name + ":" + " " + message);
+                writer.Flush();
 
-            // Broadcast new player positions to all clients
-            BroadcastGameState();
+            }
         }
     }
-}
-
-void BroadcastGameState()
-{
-    foreach (TcpClient client in allClients)
+    catch (Exception ex)
     {
-        StreamWriter writer = new StreamWriter(client.GetStream());
-        foreach (Player player in allPlayers)
-        {
+        Console.WriteLine($"Exception occurred for client {clientId}: {ex.Message}");
+    }
+    finally
+    {
+        Console.WriteLine($"Client disconnected: {clientId}");
 
-        }
-        foreach (Food food in allFood)
-        {
-
-        }
-        writer.Flush();
+        client.Dispose();
     }
 }
 

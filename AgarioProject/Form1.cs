@@ -4,6 +4,15 @@ namespace AgarioProject
 {
     public partial class Form1 : Form
     {
+        public Random random = new Random();
+        public List<PictureBox> dots = new List<PictureBox>();
+
+        public int x;
+        public int y;
+        public int spawnTimer = 10;
+
+        Color[] colors = { Color.AliceBlue, Color.Beige, Color.BlueViolet, Color.BurlyWood, Color.Crimson, Color.Cyan, Color.DarkGoldenrod, Color.DarkOrange, Color.DarkSeaGreen, Color.DeepPink, Color.HotPink, Color.LimeGreen };
+
         public Form1()
         {
             InitializeComponent();
@@ -99,7 +108,26 @@ namespace AgarioProject
         {
 
             Point mouse = PointToClient(Cursor.Position);
+            
             MoveToMouse(mouse.X, mouse.Y, pictureBox1, 3);
+
+            spawnTimer--;
+            if (spawnTimer < 1)
+            {
+                SpawnDots();
+                spawnTimer = 10;
+            }
+
+            foreach (PictureBox item in dots.ToList())
+            {
+                if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
+                {
+                    dots.Remove(item);
+                    this.Controls.Remove(item);
+
+                }
+            }
+
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -114,6 +142,24 @@ namespace AgarioProject
                         pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2)+3,
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
             }
+        }
+
+        private void SpawnDots()
+        {
+            PictureBox new_dot = new PictureBox();
+            new_dot.Height = 10;
+            new_dot.Width = 10;
+            new_dot.BackColor = colors[random.Next(0, colors.Length)];
+
+            x = random.Next(0, this.ClientSize.Width - new_dot.Width);
+            y = random.Next(0, this.ClientSize.Height - new_dot.Height);
+
+            new_dot.Location = new Point(x, y);
+
+            dots.Add(new_dot);
+            this.Controls.Add(new_dot);
+
+
         }
     }
 }
