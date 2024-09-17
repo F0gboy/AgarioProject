@@ -4,6 +4,15 @@ namespace AgarioProject
 {
     public partial class Form1 : Form
     {
+        public Random random = new Random();
+        public List<PictureBox> dots = new List<PictureBox>();
+
+        public int x;
+        public int y;
+        public int spawnTimer = 10;
+
+        Color[] colors = { Color.AliceBlue, Color.Beige, Color.BlueViolet, Color.BurlyWood, Color.Crimson, Color.Cyan, Color.DarkGoldenrod, Color.DarkOrange, Color.DarkSeaGreen, Color.DeepPink, Color.HotPink, Color.LimeGreen };
+
         public Form1()
         {
             InitializeComponent();
@@ -16,17 +25,22 @@ namespace AgarioProject
 
             //}
 
-          
+          PictureBox asd = new PictureBox();
         }
 
+        private void Expand(PictureBox obj, int amount)
+        {
+            obj.Width += amount;
+            obj.Height += amount;
+        }
 
-
-        private void MoveToMouse(int x, int y, PictureBox obj)
+        private void MoveToMouse(int x, int y, PictureBox obj, int speed)
         {
             // Get the x and y coordinates of the mouse pointer.
             //Point position = new Point(MousePosition.X, MousePosition.Y);
             //Point position = new Point(Cursor.Position.X, Cursor.Position.Y);
             Point position = new Point(x, y);
+            Point newPosition = obj.Location;
             int pX = position.X - (obj.Width / 2);
 
 
@@ -40,8 +54,47 @@ namespace AgarioProject
             //Canvas.SetTop(sender, pY - yOffset);
             //moneyText.Content = pX + "X " + pY +  "Y";
 
+            
+            if (obj.Location.X > position.X && obj.Location.X - position.X > 6)
+            {
+                newPosition = new Point(obj.Location.X- speed, obj.Location.Y);
+            }
+            else if (position.X - obj.Location.X > 6) 
+            {
+                newPosition = new Point(obj.Location.X + speed, obj.Location.Y);
+            }
 
-            obj.Location = position;
+            if (obj.Location.Y > position.Y && obj.Location.Y - position.Y > 6)
+            {
+                newPosition = new Point(newPosition.X, obj.Location.Y - speed);
+            }
+            else if (position.Y - obj.Location.Y > 6)
+            {
+                newPosition = new Point(newPosition.X, obj.Location.Y + speed);
+            }
+
+            if (newPosition.X > 950)
+            {
+                newPosition.X = 950;
+            }
+        
+            if (newPosition.Y > 900)
+            {
+                newPosition.Y = 900;
+            }
+            
+            if (newPosition.X < 0)
+            {
+                newPosition.X = 0;
+            }
+        
+            if (newPosition.Y < 0)
+            {
+                newPosition.Y = 0;
+            }
+
+            
+            obj.Location = newPosition;
 
         }
 
@@ -55,7 +108,26 @@ namespace AgarioProject
         {
 
             Point mouse = PointToClient(Cursor.Position);
-            MoveToMouse(mouse.X, mouse.Y, pictureBox1);
+            
+            MoveToMouse(mouse.X, mouse.Y, pictureBox1, 3);
+
+            spawnTimer--;
+            if (spawnTimer < 1)
+            {
+                SpawnDots();
+                spawnTimer = 10;
+            }
+
+            foreach (PictureBox item in dots.ToList())
+            {
+                if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
+                {
+                    dots.Remove(item);
+                    this.Controls.Remove(item);
+
+                }
+            }
+
         }
 
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
@@ -70,6 +142,24 @@ namespace AgarioProject
                         pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2)+3,
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
             }
+        }
+
+        private void SpawnDots()
+        {
+            PictureBox new_dot = new PictureBox();
+            new_dot.Height = 10;
+            new_dot.Width = 10;
+            new_dot.BackColor = colors[random.Next(0, colors.Length)];
+
+            x = random.Next(0, this.ClientSize.Width - new_dot.Width);
+            y = random.Next(0, this.ClientSize.Height - new_dot.Height);
+
+            new_dot.Location = new Point(x, y);
+
+            dots.Add(new_dot);
+            this.Controls.Add(new_dot);
+
+
         }
     }
 }
