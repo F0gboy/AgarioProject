@@ -6,7 +6,7 @@ namespace Chat
     {
         public TcpClient client;
         private StreamWriter writer;
-        private StreamReader reader;
+        private StreamReader? reader;
         private Thread receiveThread;
         public ChatForm()
         {
@@ -42,11 +42,11 @@ namespace Chat
         {
             richTextBox1.ReadOnly = true;
 
-            reader = new StreamReader(client.GetStream());
             while (client.Connected)
             {
                 try
                 {
+            reader = new StreamReader(client.GetStream());
                     string message = reader.ReadLine();
                     if (message != null)
                     {
