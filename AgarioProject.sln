@@ -9,7 +9,7 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "AgarioServer", "AgarioServe
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TempClient", "TempClient\TempClient.csproj", "{2915B260-2694-4BC8-A3C9-4A761E966898}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat", "Chat\Chat.csproj", "{6B2B3A17-9D30-4EDA-9ABD-81C37DCFD1F4}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Chat", "Chat\Chat.csproj", "{301B05FA-9C8D-40E3-B693-AB4138AD9EE5}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -29,10 +29,10 @@ Global
 		{2915B260-2694-4BC8-A3C9-4A761E966898}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{2915B260-2694-4BC8-A3C9-4A761E966898}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{2915B260-2694-4BC8-A3C9-4A761E966898}.Release|Any CPU.Build.0 = Release|Any CPU
-		{6B2B3A17-9D30-4EDA-9ABD-81C37DCFD1F4}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
-		{6B2B3A17-9D30-4EDA-9ABD-81C37DCFD1F4}.Debug|Any CPU.Build.0 = Debug|Any CPU
-		{6B2B3A17-9D30-4EDA-9ABD-81C37DCFD1F4}.Release|Any CPU.ActiveCfg = Release|Any CPU
-		{6B2B3A17-9D30-4EDA-9ABD-81C37DCFD1F4}.Release|Any CPU.Build.0 = Release|Any CPU
+		{301B05FA-9C8D-40E3-B693-AB4138AD9EE5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{301B05FA-9C8D-40E3-B693-AB4138AD9EE5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{301B05FA-9C8D-40E3-B693-AB4138AD9EE5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{301B05FA-9C8D-40E3-B693-AB4138AD9EE5}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
