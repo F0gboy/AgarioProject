@@ -1,6 +1,5 @@
 ﻿using System.Net.Sockets;
 using System.Net;
-using AgarioServer;
 
 TcpListener server = new TcpListener(IPAddress.Any, 12000);
 server.Start();
