@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic.Devices;
+using System.CodeDom.Compiler;
 
 namespace AgarioProject
 {
@@ -120,12 +121,22 @@ namespace AgarioProject
 
             foreach (PictureBox item in dots.ToList())
             {
-                if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
-                {
-                    dots.Remove(item);
-                    this.Controls.Remove(item);
+                //x1 - x2 = x3
+                //y1 - y2 = y3
+                //Sqr(x3 ^ 2 + y3 ^ 2)
+                
 
-                }
+                int x3 = Math.Abs(pictureBox1.Location.X - item.Location.X);
+                int y3 = Math.Abs(pictureBox1.Location.Y - item.Location.Y);
+
+                double test = Math.Sqrt(x3 ^ 2 + y3 ^ 2);
+
+                //if (test < 1)
+                //{
+                //    dots.Remove(item);
+                //    this.Controls.Remove(item);
+                //    Expand(pictureBox1, 1);
+                //}
             }
 
         }
