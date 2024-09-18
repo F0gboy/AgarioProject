@@ -26,7 +26,7 @@ namespace AgarioProject
 
             //}
 
-          PictureBox asd = new PictureBox();
+            PictureBox asd = new PictureBox();
         }
 
         private void Expand(PictureBox obj, int amount)
@@ -55,12 +55,12 @@ namespace AgarioProject
             //Canvas.SetTop(sender, pY - yOffset);
             //moneyText.Content = pX + "X " + pY +  "Y";
 
-            
+
             if (obj.Location.X > position.X && obj.Location.X - position.X > 6)
             {
-                newPosition = new Point(obj.Location.X- speed, obj.Location.Y);
+                newPosition = new Point(obj.Location.X - speed, obj.Location.Y);
             }
-            else if (position.X - obj.Location.X > 6) 
+            else if (position.X - obj.Location.X > 6)
             {
                 newPosition = new Point(obj.Location.X + speed, obj.Location.Y);
             }
@@ -74,27 +74,27 @@ namespace AgarioProject
                 newPosition = new Point(newPosition.X, obj.Location.Y + speed);
             }
 
-            if (newPosition.X > 950)
+            if (newPosition.X + (pictureBox1.Width / 2) > 990)
             {
-                newPosition.X = 950;
-            }
-        
-            if (newPosition.Y > 900)
-            {
-                newPosition.Y = 900;
-            }
-            
-            if (newPosition.X < 0)
-            {
-                newPosition.X = 0;
-            }
-        
-            if (newPosition.Y < 0)
-            {
-                newPosition.Y = 0;
+                newPosition.X = 990 - (pictureBox1.Width / 2);
             }
 
-            
+            if (newPosition.Y + (pictureBox1.Height / 2) > 950)
+            {
+                newPosition.Y = 950 - (pictureBox1.Height / 2);
+            }
+
+            if (newPosition.X + (pictureBox1.Width / 2) < 0)
+            {
+                newPosition.X = 0 - (pictureBox1.Width / 2);
+            }
+
+            if (newPosition.Y + (pictureBox1.Height / 2) < 0)
+            {
+                newPosition.Y = 0 - (pictureBox1.Height / 2);
+            }
+
+
             obj.Location = newPosition;
 
         }
@@ -109,7 +109,7 @@ namespace AgarioProject
         {
 
             Point mouse = PointToClient(Cursor.Position);
-            
+
             MoveToMouse(mouse.X, mouse.Y, pictureBox1, 3);
 
             spawnTimer--;
@@ -124,19 +124,19 @@ namespace AgarioProject
                 //x1 - x2 = x3
                 //y1 - y2 = y3
                 //Sqr(x3 ^ 2 + y3 ^ 2)
-                
 
-                int x3 = Math.Abs(pictureBox1.Location.X - item.Location.X);
-                int y3 = Math.Abs(pictureBox1.Location.Y - item.Location.Y);
 
-                double test = Math.Sqrt(x3 ^ 2 + y3 ^ 2);
+                int x3 = Math.Abs((pictureBox1.Location.X + (pictureBox1.Width / 2)) - item.Location.X);
+                int y3 = Math.Abs((pictureBox1.Location.Y + (pictureBox1.Height / 2)) - item.Location.Y);
 
-                //if (test < 1)
-                //{
-                //    dots.Remove(item);
-                //    this.Controls.Remove(item);
-                //    Expand(pictureBox1, 1);
-                //}
+                double test = (Math.Pow(Math.Pow(x3, 2) + Math.Pow(y3, 2), 0.5f)) - (pictureBox1.Width / 2);
+
+                if (test < -5)
+                {
+                    dots.Remove(item);
+                    this.Controls.Remove(item);
+                    Expand(pictureBox1, 1);
+                }
             }
 
         }
@@ -150,7 +150,7 @@ namespace AgarioProject
                     myFont,
                     Brushes.Black,
                     new Point(
-                        pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2)+3,
+                        pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
             }
         }
