@@ -22,17 +22,41 @@ namespace AgarioProject
             InitializeComponent();
         }
 
+        // Form3.cs
         private void button1_Click(object sender, EventArgs e)
         {
-            SaveIPAddress();
+            string ipAddress = textBox1.Text;  // Get the IP address from the TextBox
+
+            if (string.IsNullOrEmpty(ipAddress))
+            {
+                MessageBox.Show("Please enter a valid IP address.");
+                return;
+            }
 
             this.Hide();
             Form1 form1 = new Form1();
-            ChatForm chatForm = new ChatForm();
-            chatForm.Show();
-            form1.ShowDialog();
+            ChatForm chatForm = new ChatForm(ipAddress);  // Pass the IP to ChatForm
+            form1.Show();
+            chatForm.ShowDialog();
+         
+
             this.Close();
         }
+
+
+        //private void button1_Click(object sender, EventArgs e)
+        //{
+        //   // SaveIPAddress();
+
+        //    this.Hide();
+        //    Form1 form1 = new Form1();
+        //    string ipAddress = textBox1.Text;  // Get the IP address from the TextBox
+        //    ChatForm chatForm = new ChatForm(ipAddress);  // Pass the IP to ChatForm
+        //    //ChatForm chatForm = new ChatForm();
+        //    chatForm.Show();
+        //    form1.Show();
+        //    this.Close();
+        //}
 
         private void textBox1_TextChanged(object sender, EventArgs e)
         {
