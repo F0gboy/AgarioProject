@@ -8,13 +8,14 @@ namespace Chat
         private StreamWriter writer;
         private StreamReader? reader;
         private Thread receiveThread;
+        private string hostname;
         public ChatForm()
         {
             InitializeComponent();
 
             // Initialize and connect to the server
             client = new TcpClient();
-            client.Connect("localhost", 12000);
+            client.Connect("192.168.56.1", 12000);
 
             // Start a new thread to receive messages
             receiveThread = new Thread(() => ReceiveMessages(client));

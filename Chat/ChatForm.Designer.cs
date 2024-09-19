@@ -76,7 +76,7 @@ namespace Chat
             Controls.Add(richTextBox2);
             Controls.Add(richTextBox1);
             Name = "ChatForm";
-            Text = $"Chat";
+            Text = "Chat";
             Load += ChatForm_Load;
             ResumeLayout(false);
         }
