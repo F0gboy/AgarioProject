@@ -1,6 +1,6 @@
 ﻿namespace AgarioProject
 {
-    partial class Form2
+    partial class Form3
     {
         /// <summary>
         /// Required designer variable.
@@ -29,44 +29,43 @@
         private void InitializeComponent()
         {
             button1 = new Button();
-            button2 = new Button();
+            textBox1 = new TextBox();
             SuspendLayout();
             // 
             // button1
             // 
-            button1.Location = new Point(479, 151);
+            button1.Location = new Point(521, 226);
             button1.Name = "button1";
-            button1.Size = new Size(203, 43);
+            button1.Size = new Size(112, 34);
             button1.TabIndex = 0;
             button1.Text = "Join";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
             // 
-            // button2
+            // textBox1
             // 
-            button2.Location = new Point(479, 235);
-            button2.Name = "button2";
-            button2.Size = new Size(203, 43);
-            button2.TabIndex = 1;
-            button2.Text = "Host";
-            button2.UseVisualStyleBackColor = true;
-            button2.Click += button2_Click;
+            textBox1.Location = new Point(479, 170);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(211, 31);
+            textBox1.TabIndex = 1;
+            textBox1.TextChanged += textBox1_TextChanged;
             // 
-            // Form2
+            // Form3
             // 
             AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
-            ClientSize = new Size(1222, 559);
-            Controls.Add(button2);
+            ClientSize = new Size(1234, 541);
+            Controls.Add(textBox1);
             Controls.Add(button1);
-            Name = "Form2";
+            Name = "Form3";
             Text = "Agario";
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
 
         private Button button1;
-        private Button button2;
+        public TextBox textBox1;
     }
 }
