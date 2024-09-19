@@ -20,10 +20,29 @@ namespace AgarioProject
 
         private void button2_Click(object sender, EventArgs e)
         {
-            Form1 form1 = new Form1();
-            string ipAddress = GetLocalIPAddress();
-            form1.textBox1.Text = ipAddress;
-            form1.ShowDialog();
+             // Initialize Form1 and ChatForm
+                Form1 form1 = new Form1();
+                ChatForm chatForm = new ChatForm();
+
+                // Show Form1 first to ensure it is fully initialized before accessing its controls
+                form1.Load += (s, args) =>
+                {
+                    // After Form1 is loaded, set the IP address in textBox1
+                    string ipAddress = GetLocalIPAddress();
+                    form1.textBox1.Text = ipAddress;
+                };
+
+                // Show both forms
+                chatForm.Show();
+                form1.Show();  // ShowDialog waits for form1 to be closed before proceeding
+            
+
+            //Form1 form1 = new Form1();
+            //ChatForm chatForm = new ChatForm();
+            //string ipAddress = GetLocalIPAddress();
+            //form1.textBox1.Text = ipAddress;
+            //chatForm.Show();
+            //form1.ShowDialog();
         }
         private string GetLocalIPAddress()
         {
