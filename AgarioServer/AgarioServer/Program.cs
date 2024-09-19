@@ -3,12 +3,12 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json;
+using Newtonsoft.Json; // If you need this for JSON serialization/deserialization
 
 public class Server
 {
     private static Dictionary<Guid, PlayerInfo> playerStates = new Dictionary<Guid, PlayerInfo>();
-    static List<TcpClient> allClients = new List<TcpClient>();
+    private static List<TcpClient> allClients = new List<TcpClient>();
 
     public static void Main()
     {
@@ -16,77 +16,86 @@ public class Server
         server.Start();
         Console.WriteLine("Server started... listening on port 12000");
 
-        System.Timers.Timer broadcastTimer = new System.Timers.Timer(100); // 100ms interval
-        broadcastTimer.Elapsed += (sender, e) => BroadcastPlayerStates();
-        broadcastTimer.Start();
-
-
         while (true)
         {
-            TcpClient client = server.AcceptTcpClient();
-            Thread clientThread = new Thread(() => HandleClient(client));
-            clientThread.Start();
+            try
+            {
+                TcpClient client = server.AcceptTcpClient();
+                Thread clientThread = new Thread(() => HandleClient(client));
+                clientThread.Start();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error accepting client: {ex.Message}");
+            }
         }
     }
 
     private static void HandleClient(TcpClient client)
     {
         Guid clientId = Guid.NewGuid();
-        Console.WriteLine($"Client {clientId} connected.");
-        allClients.Add(client);
+        lock (allClients)
+        {
+            allClients.Add(client);
+        }
+
         StreamWriter writer = new StreamWriter(client.GetStream());
         StreamReader reader = new StreamReader(client.GetStream());
 
-        // Request and receive player's name (optional)
-        //writer.WriteLine("What is your name?");
-        //writer.Flush();
-        //string name = reader.ReadLine();  // For now, you can ignore this, or use it later for displaying player names
+        writer.WriteLine("What is your name?");
+        writer.Flush();
+
+        string name = reader.ReadLine(); // This line is now redundant and can be removed
+
+        PlayerInfo playerInfo = new PlayerInfo
+        {
+            Id = clientId,
+            X = 100, // starting X
+            Y = 100, // starting Y
+            Size = 20 // starting size
+        };
+
+        playerStates[clientId] = playerInfo;
 
         try
         {
             while (client.Connected)
             {
-                string message = reader.ReadLine(); // Expect JSON with player position and size
+                string message = reader.ReadLine();
                 if (message != null)
                 {
-                    Console.WriteLine($"Received message from {clientId}: {message}");
+                    // Deserialize the player data sent from the client
+                    PlayerInfo updatedPlayer = JsonConvert.DeserializeObject<PlayerInfo>(message);
 
-                    // Deserialize the JSON to PlayerInfo
-                    PlayerInfo playerData = JsonConvert.DeserializeObject<PlayerInfo>(message);
+                    // Update the server's state for this player
+                    playerStates[clientId] = updatedPlayer;
 
-                    // Store player info
-                    if (playerStates.ContainsKey(clientId))
-                    {
-                        playerStates[clientId] = playerData;
-                    }
-                    else
-                    {
-                        playerStates.Add(clientId, playerData);
-                    }
-
-                    // Broadcast updated player states to all clients
-                    BroadcastPlayerStates();
+                    // Broadcast this player's updated state to all other players
+                    BroadcastPlayerStateToAll();
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception occurred for client {clientId}: {ex.Message}");
+            Console.WriteLine($"Exception: {ex.Message}");
         }
         finally
         {
-            Console.WriteLine($"Client disconnected: {clientId}");
-            client.Dispose();
+            lock (allClients)
+            {
+                allClients.Remove(client);
+            }
             playerStates.Remove(clientId);
+            client.Dispose();
         }
     }
 
-    private static void BroadcastPlayerStates()
+    private static void BroadcastPlayerStateToAll()
     {
-        lock (playerStates)
-        {
-            string allPlayersJson = JsonConvert.SerializeObject(playerStates.Values.ToList());
+        string allPlayersJson = JsonConvert.SerializeObject(playerStates.Values.ToList());
 
+        lock (allClients)
+        {
             foreach (TcpClient client in allClients)
             {
                 if (client.Connected)
@@ -105,18 +114,12 @@ public class Server
             }
         }
     }
-
-    private static void MessageAll(string message)
-    {
-        // Implementation for broadcasting messages to all clients
-    }
 }
 
 public class PlayerInfo
 {
-    public Guid Id { get; set; } // Unique player ID
+    public Guid Id { get; set; } // Use Guid as the player identifier
     public int X { get; set; }
     public int Y { get; set; }
     public int Size { get; set; }
 }
-
