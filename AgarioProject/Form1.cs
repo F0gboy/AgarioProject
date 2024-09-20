@@ -29,11 +29,12 @@ namespace AgarioProject
             //}
 
             RandomColor(pictureBox1);
-
+            
+            
             for (int i = 0; i < 10; i++)
             {
                 EnemySpawn();
-            }
+            }            
         }
 
         private void Expand(PictureBox obj, int amount)
@@ -120,7 +121,8 @@ namespace AgarioProject
 
         private void timer1_Tick(object sender, EventArgs e)
         {
-
+           
+            
             Point mouse = PointToClient(Cursor.Position);
 
             MoveToMouse(mouse.X, mouse.Y, pictureBox1, 3);
@@ -154,9 +156,6 @@ namespace AgarioProject
 
             foreach (PictureBox ienemy in enemy.ToList())
             {
-
-
-
                 int x3 = Math.Abs((pictureBox1.Location.X + (pictureBox1.Width / 2)) - ienemy.Location.X);
                 int y3 = Math.Abs((pictureBox1.Location.Y + (pictureBox1.Height / 2)) - ienemy.Location.Y);
 
@@ -178,8 +177,8 @@ namespace AgarioProject
                     Brushes.Black,
                     new Point(
                         pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
-                        pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
-            }
+                        pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));                
+            }                            
         }
 
         private void RandomColor(PictureBox obj)
@@ -190,25 +189,40 @@ namespace AgarioProject
             {
                 case 1:
                     obj.Image = Properties.Resources.Violet;
+                    //Bitmap bitmap0 = new Bitmap(obj.Image);
+                    //var bt = MakeTransparent(bitmap0, Color.White, 100);
+                    //pictureBox1.Image = bt;
                     break;
                 case 2:
                     obj.Image = Properties.Resources.Red;
+                    //Bitmap bitmap1 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap1, Color.White, 100);
                     break;
                 case 3:
                     obj.Image = Properties.Resources.Yellow;
+                    //Bitmap bitmap2 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap2, Color.White, 100);
                     break;
                 case 4:
                     obj.Image = Properties.Resources.Blue;
+                    //Bitmap bitmap3 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap3, Color.White, 100);
                     break;
                 case 5:
                     obj.Image = Properties.Resources.Green;
+                    //Bitmap bitmap4 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap4, Color.White, 100);
                     break;
                 case 6:
                     obj.Image = Properties.Resources.Orange;
+                    //Bitmap bitmap5 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap5, Color.White, 100);
                     break;
 
                 default:
                     obj.Image = Properties.Resources.Blue;
+                    //Bitmap bitmap6 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap6, Color.White, 100);
                     break;
             }
         }
@@ -246,5 +260,25 @@ namespace AgarioProject
             enemy.Add(new_enemy);
             this.Controls.Add(new_enemy);
         }
+
+        //private Bitmap MakeTransparent(Bitmap bitmap, Color color, int tolerance)
+        //{
+        //    Bitmap transparentImage = new Bitmap(bitmap);
+
+        //    for (int i = transparentImage.Size.Width - 1; i >= 0; i--)
+        //    {
+        //        for (int j = transparentImage.Size.Height - 1; j >= 0; j--)
+        //        {
+        //            var currentColor = transparentImage.GetPixel(i, j);
+        //            if (Math.Abs(color.R - currentColor.R) < tolerance &&
+        //              Math.Abs(color.G - currentColor.G) < tolerance &&
+        //              Math.Abs(color.B - currentColor.B) < tolerance)
+        //                transparentImage.SetPixel(i, j, color);
+        //        }
+        //    }
+
+        //    transparentImage.MakeTransparent(color);
+        //    return transparentImage;
+        //}
     }
 }
