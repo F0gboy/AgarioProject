@@ -1,4 +1,5 @@
 using Microsoft.VisualBasic.Devices;
+using System;
 using System.CodeDom.Compiler;
 
 namespace AgarioProject
@@ -7,6 +8,7 @@ namespace AgarioProject
     {
         public Random random = new Random();
         public List<PictureBox> dots = new List<PictureBox>();
+        public List<PictureBox> enemy = new List<PictureBox>();
 
         public int x;
         public int y;
@@ -27,12 +29,23 @@ namespace AgarioProject
             //}
 
             RandomColor(pictureBox1);
+
+            for (int i = 0; i < 10; i++)
+            {
+                EnemySpawn();
+            }
         }
 
         private void Expand(PictureBox obj, int amount)
         {
             obj.Width += amount;
             obj.Height += amount;
+        }
+
+        private void Shrink(PictureBox obj, int amount)
+        {
+            obj.Width -= amount;
+            obj.Height -= amount;
         }
 
         private void MoveToMouse(int x, int y, PictureBox obj, int speed)
@@ -139,8 +152,22 @@ namespace AgarioProject
                 }
             }
 
-        }
+            foreach (PictureBox ienemy in enemy.ToList())
+            {
 
+
+
+                int x3 = Math.Abs((pictureBox1.Location.X + (pictureBox1.Width / 2)) - ienemy.Location.X);
+                int y3 = Math.Abs((pictureBox1.Location.Y + (pictureBox1.Height / 2)) - ienemy.Location.Y);
+
+                double test = (Math.Pow(Math.Pow(x3, 2) + Math.Pow(y3, 2), 0.5f)) - (pictureBox1.Width / 2);
+
+                if (test < -5)
+                {
+                    Shrink(pictureBox1, 10);
+                }
+            }
+        }
         private void pictureBox1_Paint(object sender, PaintEventArgs e)
         {
             using (Font myFont = new Font("Arial", 14))
@@ -202,6 +229,22 @@ namespace AgarioProject
             this.Controls.Add(new_dot);
 
 
+        }
+
+        private void EnemySpawn()
+        {
+            PictureBox new_enemy = new PictureBox();
+            new_enemy.Height = 50;
+            new_enemy.Width = 50;
+            new_enemy.BackColor = Color.Black;
+
+            x = random.Next(0, this.ClientSize.Width - new_enemy.Width);
+            y = random.Next(0, this.ClientSize.Height - new_enemy.Height);
+
+            new_enemy.Location = new Point(x, y);
+
+            enemy.Add(new_enemy);
+            this.Controls.Add(new_enemy);
         }
     }
 }
