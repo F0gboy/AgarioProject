@@ -26,7 +26,7 @@ namespace AgarioProject
 
             //}
 
-            PictureBox asd = new PictureBox();
+            RandomColor(pictureBox1);
         }
 
         private void Expand(PictureBox obj, int amount)
@@ -74,19 +74,19 @@ namespace AgarioProject
                 newPosition = new Point(newPosition.X, obj.Location.Y + speed);
             }
 
-            if (newPosition.X + (pictureBox1.Width / 2) > 990)
+            if (newPosition.X + (obj.Width / 2) > 990)
             {
-                newPosition.X = 990 - (pictureBox1.Width / 2);
+                newPosition.X = 990 - (obj.Width / 2);
             }
 
-            if (newPosition.Y + (pictureBox1.Height / 2) > 950)
+            if (newPosition.Y + (obj.Height / 2) > 950)
             {
-                newPosition.Y = 950 - (pictureBox1.Height / 2);
+                newPosition.Y = 950 - (obj.Height / 2);
             }
 
-            if (newPosition.X + (pictureBox1.Width / 2) < 0)
+            if (newPosition.X + (obj.Width / 2) < 0)
             {
-                newPosition.X = 0 - (pictureBox1.Width / 2);
+                newPosition.X = 0 - (obj.Width / 2);
             }
 
             if (newPosition.Y + (pictureBox1.Height / 2) < 0)
@@ -152,6 +152,37 @@ namespace AgarioProject
                     new Point(
                         pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
+            }
+        }
+
+        private void RandomColor(PictureBox obj)
+        {
+            
+            int tempNum = random.Next(1, 7); 
+            switch (tempNum)
+            {
+                case 1:
+                    obj.Image = Properties.Resources.Violet;
+                    break;
+                case 2:
+                    obj.Image = Properties.Resources.Red;
+                    break;
+                case 3:
+                    obj.Image = Properties.Resources.Yellow;
+                    break;
+                case 4:
+                    obj.Image = Properties.Resources.Blue;
+                    break;
+                case 5:
+                    obj.Image = Properties.Resources.Green;
+                    break;
+                case 6:
+                    obj.Image = Properties.Resources.Orange;
+                    break;
+
+                default:
+                    obj.Image = Properties.Resources.Blue;
+                    break;
             }
         }
 
