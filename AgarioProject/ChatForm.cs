@@ -1,6 +1,15 @@
+﻿using System;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Drawing;
+using System.Linq;
 using System.Net.Sockets;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
 
-namespace Chat
+namespace AgarioProject
 {
     public partial class ChatForm : Form
     {
@@ -8,61 +17,26 @@ namespace Chat
         private StreamWriter writer;
         private StreamReader? reader;
         private Thread receiveThread;
-        private string hostname;
         public ChatForm()
         {
             InitializeComponent();
-            LoadIPAddress();
+
             // Initialize and connect to the server
-            //client = new TcpClient();
-            ////client.Connect("localhost", 12000);
-
-            //// Start a new thread to receive messages
-            //receiveThread = new Thread(() => ReceiveMessages(client));
-            //receiveThread.IsBackground = true;
-            //receiveThread.Start();
-
-            //// Initialize the writer to send messages to the server
-            //writer = new StreamWriter(client.GetStream());
-        }
-        public void LoadIPAddress()
-        {
-            string ipAddress = "localhost";  // Default IP address
-
-            if (File.Exists("ip_address.txt"))
-            {
-                try
-                {
-                    ipAddress = File.ReadAllText("ip_address.txt").Trim();  // Read and trim IP from file
-                }
-                catch (Exception ex)
-                {
-                    MessageBox.Show($"Error reading IP address from file: {ex.Message}");
-                }
-            }
-            else
-            {
-                MessageBox.Show("IP address file not found. Using default IP 'localhost'.");
-            }
-
             client = new TcpClient();
-            try
-            {
-                client.Connect(ipAddress, 12000);  // Use the IP address to connect
-            }
-            catch (Exception ex)
-            {
-                MessageBox.Show($"Could not connect to the server: {ex.Message}");
-            }
-
+           // client.Connect("localhost", 12000);
+            string hostname;
+            Form3 form3= new Form3();
+            hostname = form3.textBox1.Text;
+            client.Connect(hostname, 12000);
+            //// Start a new thread to receive messages
             receiveThread = new Thread(() => ReceiveMessages(client));
             receiveThread.IsBackground = true;
             receiveThread.Start();
 
+            //// Initialize the writer to send messages to the server
             writer = new StreamWriter(client.GetStream());
-
-
         }
+        
 
         private void button1_Click(object sender, EventArgs e)
         {
@@ -85,7 +59,7 @@ namespace Chat
             {
                 try
                 {
-            reader = new StreamReader(client.GetStream());
+                    reader = new StreamReader(client.GetStream());
                     string message = reader.ReadLine();
                     if (message != null)
                     {
@@ -103,7 +77,7 @@ namespace Chat
                 }
             }
         }
-    
+
 
         private void ChatForm_Load(object sender, EventArgs e)
         {

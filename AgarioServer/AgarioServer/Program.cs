@@ -21,7 +21,7 @@ while (true)
 }
 
 void MessageAll(string message)
-{
+{   
     foreach (TcpClient client in allClients)
     {
         StreamWriter writer = new StreamWriter(client.GetStream());

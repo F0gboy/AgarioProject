@@ -1,18 +1,14 @@
-﻿using System.Drawing.Text;
-using System.Net.Sockets;
-
-using static System.Net.Mime.MediaTypeNames;
-namespace Chat
+﻿namespace AgarioProject
 {
-    public partial class ChatForm: Form
+    public partial class ChatForm : Form
     {
-        
-       
 
 
-            /// <summary>
-            ///  Required designer variable.
-            /// </summary>
+
+
+        /// <summary>
+        ///  Required designer variable.
+        /// </summary>
         private System.ComponentModel.IContainer components = null;
 
         /// <summary>
