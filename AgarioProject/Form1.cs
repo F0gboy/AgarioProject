@@ -1,4 +1,6 @@
 using Microsoft.VisualBasic.Devices;
+using System;
+using System.CodeDom.Compiler;
 using System.Net.Sockets;
 using Newtonsoft.Json;
 using Timer = System.Windows.Forms.Timer;
@@ -8,53 +10,50 @@ namespace AgarioProject
 {
     public partial class Form1 : Form
     {
-        private Dictionary<Guid, PictureBox> otherPlayers = new Dictionary<Guid, PictureBox>();
         public Random random = new Random();
         public List<PictureBox> dots = new List<PictureBox>();
+        public List<PictureBox> enemy = new List<PictureBox>();
+
+        private Dictionary<Guid, PictureBox> otherPlayers = new Dictionary<Guid, PictureBox>();
         public int x;
         public int y;
         public int spawnTimer = 10;
         private Guid myPlayerId;
+        private TcpClient client;
+        private StreamWriter writer;
+        private StreamReader reader;
+        private Thread receiveThread;
         Color[] colors = { Color.AliceBlue, Color.Beige, Color.BlueViolet, Color.BurlyWood, Color.Crimson, Color.Cyan, Color.DarkGoldenrod, Color.DarkOrange, Color.DarkSeaGreen, Color.DeepPink, Color.HotPink, Color.LimeGreen };
 
         public class PlayerInfo
         {
-            public Guid Id { get; set; }  // Ensure this is a unique ID
+            public Guid Id { get; set; }
             public int X { get; set; }
             public int Y { get; set; }
             public int Size { get; set; }
 
-            // Constructor to initialize the player info with a unique Id
             public PlayerInfo()
             {
-                Id = Guid.NewGuid();  // Assign a new GUID when a player is created
+                Id = Guid.NewGuid();
             }
         }
-
-        public TcpClient client;
-        private StreamWriter writer;
-        private StreamReader reader;
-        private Thread receiveThread;
 
         public Form1()
         {
             InitializeComponent();
-
             try
             {
-                // Initialize and connect to the server
                 client = new TcpClient();
-                client.Connect("localhost", 12000); // Ensure the server is running at this IP and port
+                client.Connect("localhost", 12000);
 
-                // Initialize the writer to send messages to the server
                 writer = new StreamWriter(client.GetStream());
                 reader = new StreamReader(client.GetStream());
 
-                InitializePlayer(); // Ensure this is called
+                InitializePlayer();
+                StartSendingPlayerUpdates();
 
-                Debug.WriteLine($"My player ID: {myPlayerId}"); // Print the player ID to verify
+                Debug.WriteLine($"My player ID: {myPlayerId}");
 
-                // Start the thread to receive messages
                 receiveThread = new Thread(() => ReceiveMessages(client));
                 receiveThread.Start();
             }
@@ -69,19 +68,16 @@ namespace AgarioProject
         {
             if (myPlayerId == Guid.Empty)
             {
-                myPlayerId = Guid.NewGuid(); // Generate a new unique ID
-                Console.WriteLine($"Generated client ID: {myPlayerId}"); // Debugging print
+                myPlayerId = Guid.NewGuid();
+                Console.WriteLine($"Generated client ID: {myPlayerId}");
             }
         }
 
         private void StartSendingPlayerUpdates()
         {
             Timer sendTimer = new Timer();
-            sendTimer.Interval = 100; // 100ms update interval
-            sendTimer.Tick += (sender, e) =>
-            {
-                SendPlayerState(); // Send current player state to server
-            };
+            sendTimer.Interval = 100;
+            sendTimer.Tick += (sender, e) => SendPlayerState();
             sendTimer.Start();
         }
 
@@ -91,17 +87,17 @@ namespace AgarioProject
             {
                 PlayerInfo myState = new PlayerInfo
                 {
-                    Id = myPlayerId, // Reuse the previously generated unique player ID
-                    X = pictureBox1.Location.X,  // Player's current X position
-                    Y = pictureBox1.Location.Y,  // Player's current Y position
-                    Size = pictureBox1.Width     // Player size
+                    Id = myPlayerId,
+                    X = pictureBox1.Location.X,
+                    Y = pictureBox1.Location.Y,
+                    Size = pictureBox1.Width
                 };
 
                 string myStateJson = JsonConvert.SerializeObject(myState);
 
                 try
                 {
-                    writer.WriteLine(myStateJson); // Send serialized player state to the server
+                    writer.WriteLine(myStateJson);
                     writer.Flush();
                 }
                 catch (Exception ex)
@@ -123,10 +119,7 @@ namespace AgarioProject
                     string message = reader.ReadLine();
                     if (message != null)
                     {
-                        // Deserialize the JSON into a list of PlayerInfo
                         List<PlayerInfo> allPlayers = JsonConvert.DeserializeObject<List<PlayerInfo>>(message);
-
-                        // Update the client’s rendering based on allPlayers
                         UpdateGameWithPlayerData(allPlayers);
                     }
                 }
@@ -140,13 +133,10 @@ namespace AgarioProject
 
         private void UpdateGameWithPlayerData(List<PlayerInfo> allPlayers)
         {
-            // Clear all previous player representations (if necessary)
-
             foreach (PlayerInfo player in allPlayers)
             {
-                if (player.Id != myPlayerId) // Skip the current player to avoid overwriting local movement
+                if (player.Id != myPlayerId)
                 {
-                    // Update or create a PictureBox representing each player
                     PictureBox otherPlayer = GetOrCreatePlayerPictureBox(player.Id);
 
                     otherPlayer.Location = new Point(player.X, player.Y);
@@ -158,14 +148,13 @@ namespace AgarioProject
 
         private PictureBox GetOrCreatePlayerPictureBox(Guid playerId)
         {
-            // Check if the player already exists, otherwise create a new one
             PictureBox playerBox = otherPlayers.ContainsKey(playerId) ? otherPlayers[playerId] : null;
 
             if (playerBox == null)
             {
                 playerBox = new PictureBox
                 {
-                    BackColor = Color.Red // Assign a color for the other player
+                    BackColor = Color.Red
                 };
                 otherPlayers[playerId] = playerBox;
                 this.Controls.Add(playerBox);
@@ -176,13 +165,19 @@ namespace AgarioProject
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            // Initialization code here
+            RandomColor(pictureBox1);
         }
 
         private void Expand(PictureBox obj, int amount)
         {
             obj.Width += amount;
             obj.Height += amount;
+        }
+
+        private void Shrink(PictureBox obj, int amount)
+        {
+            obj.Width -= amount;
+            obj.Height -= amount;
         }
 
         private void MoveToMouse(int x, int y, PictureBox obj, int speed)
@@ -211,32 +206,27 @@ namespace AgarioProject
                 newPosition = new Point(newPosition.X, obj.Location.Y + speed);
             }
 
-            if (newPosition.X > 950)
+            if (newPosition.X + (obj.Width / 2) > 990)
             {
-                newPosition.X = 950;
+                newPosition.X = 990 - (obj.Width / 2);
             }
 
-            if (newPosition.Y > 900)
+            if (newPosition.Y + (obj.Height / 2) > 950)
             {
-                newPosition.Y = 900;
+                newPosition.Y = 950 - (obj.Height / 2);
             }
 
-            if (newPosition.X < 0)
+            if (newPosition.X + (obj.Width / 2) < 0)
             {
-                newPosition.X = 0;
+                newPosition.X = 0 - (obj.Width / 2);
             }
 
-            if (newPosition.Y < 0)
+            if (newPosition.Y + (pictureBox1.Height / 2) < 0)
             {
-                newPosition.Y = 0;
+                newPosition.Y = 0 - (pictureBox1.Height / 2);
             }
 
             obj.Location = newPosition;
-        }
-
-        private void Form1_MouseMove(object sender, MouseEventArgs e)
-        {
-            // Handle mouse movement if necessary
         }
 
         private void timer1_Tick(object sender, EventArgs e)
@@ -244,48 +234,68 @@ namespace AgarioProject
             Point mouse = PointToClient(Cursor.Position);
             MoveToMouse(mouse.X, mouse.Y, pictureBox1, 3);
 
-            PlayerInfo playerData = new PlayerInfo
+            spawnTimer--;
+            if (spawnTimer < 1)
             {
-                Id = myPlayerId,    // Use the same unique ID for broadcasting
-                X = pictureBox1.Location.X,
-                Y = pictureBox1.Location.Y,
-                Size = pictureBox1.Width // or Height, since they're equal
-            };
+                SpawnDots();
+                spawnTimer = 10;
+            }
 
-            // Serialize the player data and send it to the server
-            string jsonData = JsonConvert.SerializeObject(playerData);
-            writer.WriteLine(jsonData);
-            writer.Flush();
+            foreach (PictureBox item in dots.ToList())
+            {
+                int x3 = Math.Abs((pictureBox1.Location.X + (pictureBox1.Width / 2)) - item.Location.X);
+                int y3 = Math.Abs((pictureBox1.Location.Y + (pictureBox1.Height / 2)) - item.Location.Y);
 
-            // Rest of your game logic (like spawning dots, detecting collisions, etc.)
+                double distance = Math.Pow(Math.Pow(x3, 2) + Math.Pow(y3, 2), 0.5f) - (pictureBox1.Width / 2);
+
+                if (distance < -5)
+                {
+                    dots.Remove(item);
+                    this.Controls.Remove(item);
+                    Expand(pictureBox1, 1);
+                }
+            }
+
+            foreach (PictureBox ienemy in enemy.ToList())
+            {
+                int x3 = Math.Abs((pictureBox1.Location.X + (pictureBox1.Width / 2)) - ienemy.Location.X);
+                int y3 = Math.Abs((pictureBox1.Location.Y + (pictureBox1.Height / 2)) - ienemy.Location.Y);
+
+                double distance = Math.Pow(Math.Pow(x3, 2) + Math.Pow(y3, 2), 0.5f) - (pictureBox1.Width / 2);
+
+                if (distance < -5)
+                {
+                    Shrink(pictureBox1, 10);
+                }
+            }
         }
 
-        private void BroadcastInfo()
+        private void RandomColor(PictureBox obj)
         {
-            PlayerInfo playerData = new PlayerInfo
+            int tempNum = random.Next(1, 7);
+            switch (tempNum)
             {
-                Id = myPlayerId,    // Use the same unique ID for broadcasting
-                X = pictureBox1.Location.X,
-                Y = pictureBox1.Location.Y,
-                Size = pictureBox1.Width // or Height, since they're equal
-            };
-
-            string jsonData = JsonConvert.SerializeObject(playerData);
-            writer.WriteLine(jsonData);
-            writer.Flush();
-        }
-
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
-        {
-            using (Font myFont = new Font("Arial", 14))
-            {
-                e.Graphics.DrawString(
-                    pictureBox1.Width.ToString(),
-                    myFont,
-                    Brushes.Black,
-                    new Point(
-                        pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
-                        pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
+                case 1:
+                    obj.Image = Properties.Resources.Violet;
+                    break;
+                case 2:
+                    obj.Image = Properties.Resources.Red;
+                    break;
+                case 3:
+                    obj.Image = Properties.Resources.Yellow;
+                    break;
+                case 4:
+                    obj.Image = Properties.Resources.Blue;
+                    break;
+                case 5:
+                    obj.Image = Properties.Resources.Green;
+                    break;
+                case 6:
+                    obj.Image = Properties.Resources.Orange;
+                    break;
+                default:
+                    obj.Image = Properties.Resources.Blue;
+                    break;
             }
         }
 
@@ -295,21 +305,29 @@ namespace AgarioProject
             {
                 Height = 10,
                 Width = 10,
-                BackColor = colors[random.Next(0, colors.Length)]
+                BackColor = colors[random.Next(0, colors.Length)],
+                Location = new Point(random.Next(100, 800), random.Next(100, 800))
             };
-
-            x = random.Next(0, this.ClientSize.Width - new_dot.Width);
-            y = random.Next(0, this.ClientSize.Height - new_dot.Height);
-
-            new_dot.Location = new Point(x, y);
-
-            dots.Add(new_dot);
             this.Controls.Add(new_dot);
+            dots.Add(new_dot);
+        }
+
+        private void Form1_MouseMove(object sender, MouseEventArgs e)
+        {
+            // Code for handling mouse movement within the form
         }
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
-            // Handle PictureBox click if necessary
+            // Code for handling the click event
         }
+
+        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        {
+            // Your custom drawing logic here
+        }
+
+
+
     }
 }
