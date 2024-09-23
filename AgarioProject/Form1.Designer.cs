@@ -33,17 +33,19 @@
             pictureBox1 = new PictureBox();
             timer1 = new System.Windows.Forms.Timer(components);
             contextMenuStrip1 = new ContextMenuStrip(components);
+            textBox1 = new TextBox();
+            contextMenuStrip2 = new ContextMenuStrip(components);
             ((System.ComponentModel.ISupportInitialize)pictureBox1).BeginInit();
             SuspendLayout();
             // 
             // pictureBox1
             // 
-            pictureBox1.Image = (Image)resources.GetObject("pictureBox1.Image");
+            pictureBox1.Image = Properties.Resources.Red;
             pictureBox1.InitialImage = (Image)resources.GetObject("pictureBox1.InitialImage");
-            pictureBox1.Location = new Point(472, 116);
-            pictureBox1.Margin = new Padding(3, 2, 3, 2);
+            pictureBox1.Location = new Point(675, 192);
+            pictureBox1.Margin = new Padding(4);
             pictureBox1.Name = "pictureBox1";
-            pictureBox1.Size = new Size(52, 45);
+            pictureBox1.Size = new Size(75, 75);
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
@@ -62,22 +64,37 @@
             contextMenuStrip1.Name = "contextMenuStrip1";
             contextMenuStrip1.Size = new Size(61, 4);
             // 
+            // textBox1
+            // 
+            textBox1.Location = new Point(12, 12);
+            textBox1.Name = "textBox1";
+            textBox1.Size = new Size(150, 31);
+            textBox1.TabIndex = 1;
+            // 
+            // contextMenuStrip2
+            // 
+            contextMenuStrip2.ImageScalingSize = new Size(24, 24);
+            contextMenuStrip2.Name = "contextMenuStrip2";
+            contextMenuStrip2.Size = new Size(61, 4);
+            // 
             // Form1
             // 
-            AutoScaleDimensions = new SizeF(7F, 15F);
+            AutoScaleDimensions = new SizeF(10F, 25F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(861, 721);
+            ClientSize = new Size(1222, 1050);
+            Controls.Add(textBox1);
             Controls.Add(pictureBox1);
-            Margin = new Padding(3, 2, 3, 2);
-            MaximumSize = new Size(877, 760);
-            MinimumSize = new Size(877, 760);
+            Margin = new Padding(4);
+            MaximumSize = new Size(1244, 1236);
+            MinimumSize = new Size(1244, 1006);
             Name = "Form1";
-            Text = "EOH";
+            Text = "Agario";
             Load += Form1_Load;
             MouseMove += Form1_MouseMove;
             ((System.ComponentModel.ISupportInitialize)pictureBox1).EndInit();
             ResumeLayout(false);
+            PerformLayout();
         }
 
         #endregion
@@ -85,5 +102,7 @@
         private PictureBox pictureBox1;
         private System.Windows.Forms.Timer timer1;
         private ContextMenuStrip contextMenuStrip1;
+        public TextBox textBox1;
+        private ContextMenuStrip contextMenuStrip2;
     }
 }

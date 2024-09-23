@@ -165,7 +165,18 @@ namespace AgarioProject
 
         private void Form1_Load(object sender, EventArgs e)
         {
+            //while (true)
+            //{
+
+            //}
+
             RandomColor(pictureBox1);
+            
+            
+            for (int i = 0; i < 10; i++)
+            {
+                EnemySpawn();
+            }            
         }
 
         private void Expand(PictureBox obj, int amount)
