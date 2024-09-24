@@ -145,38 +145,67 @@ namespace AgarioProject
             public List<DotInfo> Dots { get; set; }
         }
 
-        // Method to update dots
-        private void UpdateDots(List<DotInfo> dots)
+        private void UpdateDots(List<DotInfo> serverDots)
         {
             if (this.InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
                 {
-                    UpdateDots(dots);
+                    UpdateDots(serverDots);
                 });
                 return;
             }
 
-            // Clear previous dots from the UI
-            foreach (var dot in this.dots.ToList())
+            // Keep track of which dots from the server are new
+            var dotIds = new HashSet<string>();
+
+            // Update existing dots or add new ones if they don't exist
+            foreach (var dotInfo in serverDots)
             {
-                this.Controls.Remove(dot);
-                this.dots.Remove(dot);
+                // Create a unique identifier for the dot based on its position
+                string dotId = $"{dotInfo.X}_{dotInfo.Y}_{dotInfo.Size}";
+                dotIds.Add(dotId);
+
+                // Find if a dot with the same position and size already exists
+                var existingDot = dots.FirstOrDefault(d =>
+                    d.Location.X == dotInfo.X &&
+                    d.Location.Y == dotInfo.Y &&
+                    d.Width == dotInfo.Size &&
+                    d.Height == dotInfo.Size);
+
+                if (existingDot != null)
+                {
+                    // Dot already exists, just update its properties if needed (color, etc.)
+                    //existingDot.BackColor = colors[random.Next(0, colors.Length)];
+                }
+                else
+                {
+                    // Create new dot and add it to the form and list
+                    PictureBox newDot = new PictureBox
+                    {
+                        Width = dotInfo.Size,
+                        Height = dotInfo.Size,
+                        Location = new Point(dotInfo.X, dotInfo.Y),
+                        BackColor = colors[random.Next(0, colors.Length)] // Random color for variety
+                    };
+
+                    this.Controls.Add(newDot);
+                    dots.Add(newDot);
+                }
             }
 
-            // Render new dots on the UI
-            foreach (DotInfo dot in dots)
+            // Remove dots that no longer exist on the server
+            foreach (var existingDot in dots.ToList())
             {
-                PictureBox newDot = new PictureBox
-                {
-                    Width = dot.Size,
-                    Height = dot.Size,
-                    Location = new Point(dot.X, dot.Y),
-                    BackColor = colors[random.Next(0, colors.Length)] // Random color for each dot
-                };
+                // Create a unique identifier for the dot based on its position
+                string existingDotId = $"{existingDot.Location.X}_{existingDot.Location.Y}_{existingDot.Width}";
 
-                this.Controls.Add(newDot);
-                this.dots.Add(newDot);
+                if (!dotIds.Contains(existingDotId))
+                {
+                    // If the dot no longer exists on the server, remove it from the form and list
+                    this.Controls.Remove(existingDot);
+                    dots.Remove(existingDot);
+                }
             }
         }
 
@@ -330,11 +359,11 @@ namespace AgarioProject
             BroadcastInfo();
 
             spawnTimer--;
-            if (spawnTimer < 1)
-            {
-                SpawnDots();
-                spawnTimer = 10;
-            }
+            //if (spawnTimer < 1)
+            //{
+            //    SpawnDots();
+            //    spawnTimer = 10;
+            //}
 
             foreach (PictureBox item in dots.ToList())
             {
@@ -375,22 +404,22 @@ namespace AgarioProject
             }
         }
 
-        private void SpawnDots()
-        {
-            PictureBox new_dot = new PictureBox();
-            new_dot.Height = 10;
-            new_dot.Width = 10;
-            new_dot.BackColor = colors[random.Next(0, colors.Length)];
+        //private void SpawnDots()
+        //{
+        //    PictureBox new_dot = new PictureBox();
+        //    new_dot.Height = 10;
+        //    new_dot.Width = 10;
+        //    new_dot.BackColor = colors[random.Next(0, colors.Length)];
 
-            x = random.Next(0, this.ClientSize.Width - new_dot.Width);
-            y = random.Next(0, this.ClientSize.Height - new_dot.Height);
+        //    x = random.Next(0, this.ClientSize.Width - new_dot.Width);
+        //    y = random.Next(0, this.ClientSize.Height - new_dot.Height);
 
-            new_dot.Location = new Point(x, y);
+        //    new_dot.Location = new Point(x, y);
 
-            dots.Add(new_dot);
-            this.Controls.Add(new_dot);
+        //    dots.Add(new_dot);
+        //    this.Controls.Add(new_dot);
 
-        }
+        //}
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {

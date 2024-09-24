@@ -41,17 +41,30 @@ public class Server
     {
         lock (dots)
         {
-            // Spawn a new dot with random location and size
-            DotInfo newDot = new DotInfo
+            // Check if the maximum number of dots has been reached
+            if (dots.Count < 20) // Limit to 20 dots, for example
             {
-                X = random.Next(0, 950), // Assuming 950 is the width limit
-                Y = random.Next(0, 900), // Assuming 900 is the height limit
-                Size = random.Next(10, 20) // Random size between 10 and 20
-            };
-            dots.Add(newDot);
+                // Spawn a new dot with random location and size
+                DotInfo newDot = new DotInfo
+                {
+                    X = random.Next(0, 950), // Assuming 950 is the width limit
+                    Y = random.Next(0, 900), // Assuming 900 is the height limit
+                    Size = random.Next(10, 20) // Random size between 10 and 20
+                };
+                dots.Add(newDot);
 
-            // Log for debugging
-            Console.WriteLine($"Dot spawned at ({newDot.X}, {newDot.Y}) with size {newDot.Size}");
+                // Log for debugging
+                Console.WriteLine($"Dot spawned at ({newDot.X}, {newDot.Y}) with size {newDot.Size}");
+            }
+            else
+            {
+                // Optionally, update existing dots or adjust their sizes
+                foreach (var dot in dots)
+                {
+                    // For example, you can randomly increase the size of existing dots
+                    dot.Size = random.Next(10, 20);
+                }
+            }
         }
     }
 
@@ -115,7 +128,7 @@ public class Server
             var broadcastData = new
             {
                 Players = playerStates.Values.ToList(),
-                Dots = dots
+                Dots = dots.Select(dot => new { dot.X, dot.Y, dot.Size }).ToList() // Prepare for serialization
             };
 
             string broadcastJson = JsonConvert.SerializeObject(broadcastData);
