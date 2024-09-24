@@ -3,99 +3,123 @@ using System.Net;
 using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
-using Newtonsoft.Json; // If you need this for JSON serialization/deserialization
+using Newtonsoft.Json;
 
 public class Server
 {
     private static Dictionary<Guid, PlayerInfo> playerStates = new Dictionary<Guid, PlayerInfo>();
-    private static List<TcpClient> allClients = new List<TcpClient>();
+    static List<TcpClient> allClients = new List<TcpClient>();
 
-    public static void Main()
+    private static List<DotInfo> dots = new List<DotInfo>(); // Store dots
+    private static Random random = new Random();
+
+    private static void Main()
     {
         TcpListener server = new TcpListener(IPAddress.Any, 12000);
         server.Start();
         Console.WriteLine("Server started... listening on port 12000");
 
+        // Start a timer to broadcast player states and dots to all clients
+        System.Timers.Timer broadcastTimer = new System.Timers.Timer(100); // 100ms interval
+        broadcastTimer.Elapsed += (sender, e) => BroadcastPlayerStatesAndDots();
+        broadcastTimer.Start();
+
+        // Start another timer to spawn dots periodically
+        System.Timers.Timer spawnDotsTimer = new System.Timers.Timer(2000); // Spawn dots every 2 seconds
+        spawnDotsTimer.Elapsed += (sender, e) => SpawnDots();
+        spawnDotsTimer.Start();
+
         while (true)
         {
-            try
+            TcpClient client = server.AcceptTcpClient();
+            Thread clientThread = new Thread(() => HandleClient(client));
+            clientThread.Start();
+        }
+    }
+
+    private static void SpawnDots()
+    {
+        lock (dots)
+        {
+            // Spawn a new dot with random location and size
+            DotInfo newDot = new DotInfo
             {
-                TcpClient client = server.AcceptTcpClient();
-                Thread clientThread = new Thread(() => HandleClient(client));
-                clientThread.Start();
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine($"Error accepting client: {ex.Message}");
-            }
+                X = random.Next(0, 950), // Assuming 950 is the width limit
+                Y = random.Next(0, 900), // Assuming 900 is the height limit
+                Size = random.Next(10, 20) // Random size between 10 and 20
+            };
+            dots.Add(newDot);
+
+            // Log for debugging
+            Console.WriteLine($"Dot spawned at ({newDot.X}, {newDot.Y}) with size {newDot.Size}");
         }
     }
 
     private static void HandleClient(TcpClient client)
     {
         Guid clientId = Guid.NewGuid();
-        lock (allClients)
-        {
-            allClients.Add(client);
-        }
-
+        Console.WriteLine($"Client {clientId} connected.");
+        allClients.Add(client);
         StreamWriter writer = new StreamWriter(client.GetStream());
         StreamReader reader = new StreamReader(client.GetStream());
 
-        writer.WriteLine("What is your name?");
-        writer.Flush();
-
-        string name = reader.ReadLine(); // This line is now redundant and can be removed
-
-        PlayerInfo playerInfo = new PlayerInfo
-        {
-            Id = clientId,
-            X = 100, // starting X
-            Y = 100, // starting Y
-            Size = 20 // starting size
-        };
-
-        playerStates[clientId] = playerInfo;
+        // Request and receive player's name (optional)
+        //writer.WriteLine("What is your name?");
+        //writer.Flush();
+        //string name = reader.ReadLine();  // For now, you can ignore this, or use it later for displaying player names
 
         try
         {
             while (client.Connected)
             {
-                string message = reader.ReadLine();
+                string message = reader.ReadLine(); // Expect JSON with player position and size
                 if (message != null)
                 {
-                    // Deserialize the player data sent from the client
-                    PlayerInfo updatedPlayer = JsonConvert.DeserializeObject<PlayerInfo>(message);
+                    Console.WriteLine($"Received message from {clientId}: {message}");
 
-                    // Update the server's state for this player
-                    playerStates[clientId] = updatedPlayer;
+                    // Deserialize the JSON to PlayerInfo
+                    PlayerInfo playerData = JsonConvert.DeserializeObject<PlayerInfo>(message);
 
-                    // Broadcast this player's updated state to all other players
-                    BroadcastPlayerStateToAll();
+                    // Store player info
+                    if (playerStates.ContainsKey(clientId))
+                    {
+                        playerStates[clientId] = playerData;
+                    }
+                    else
+                    {
+                        playerStates.Add(clientId, playerData);
+                    }
+
+                    // Broadcast updated player states to all clients
+                    BroadcastPlayerStatesAndDots();
                 }
             }
         }
         catch (Exception ex)
         {
-            Console.WriteLine($"Exception: {ex.Message}");
+            Console.WriteLine($"Exception occurred for client {clientId}: {ex.Message}");
         }
         finally
         {
-            lock (allClients)
-            {
-                allClients.Remove(client);
-            }
-            playerStates.Remove(clientId);
+            Console.WriteLine($"Client disconnected: {clientId}");
             client.Dispose();
+            playerStates.Remove(clientId);
         }
     }
 
-    private static void BroadcastPlayerStateToAll()
+    private static void BroadcastPlayerStatesAndDots()
     {
-        string allPlayersJson = JsonConvert.SerializeObject(playerStates.Values.ToList());
-
-        lock (allClients)
+        lock (playerStates)
         {
+            // Serialize both player states and dots together
+            var broadcastData = new
+            {
+                Players = playerStates.Values.ToList(),
+                Dots = dots
+            };
+
+            string broadcastJson = JsonConvert.SerializeObject(broadcastData);
+
             foreach (TcpClient client in allClients)
             {
                 if (client.Connected)
@@ -103,7 +127,7 @@ public class Server
                     try
                     {
                         StreamWriter writer = new StreamWriter(client.GetStream());
-                        writer.WriteLine(allPlayersJson);
+                        writer.WriteLine(broadcastJson);
                         writer.Flush();
                     }
                     catch (Exception ex)
@@ -114,11 +138,23 @@ public class Server
             }
         }
     }
+
+    private static void MessageAll(string message)
+    {
+        // Implementation for broadcasting messages to all clients
+    }
 }
 
 public class PlayerInfo
 {
-    public Guid Id { get; set; } // Use Guid as the player identifier
+    public Guid Id { get; set; } // Unique player ID
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Size { get; set; }
+}
+
+public class DotInfo
+{
     public int X { get; set; }
     public int Y { get; set; }
     public int Size { get; set; }
