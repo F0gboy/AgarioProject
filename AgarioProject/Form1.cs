@@ -68,6 +68,9 @@ namespace AgarioProject
         {
             // Generate a unique ID for this player
             myPlayerId = Guid.NewGuid();
+
+            RandomColor(pictureBox1);
+
         }
 
 
@@ -244,8 +247,17 @@ namespace AgarioProject
                         Width = player.Size,
                         Height = player.Size,
                         Location = new Point(player.X, player.Y),
-                        BackColor = Color.Gray // Color for other players
+                        Margin = new Padding(3, 2, 3, 2),
+                        Size = new Size(52, 45),
+
+                        //BackColor = Color.Gray // Color for other players
                     };
+
+                    RandomColor(otherPlayer);
+
+                    otherPlayer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
+
+                    otherPlayer.SizeMode = PictureBoxSizeMode.StretchImage;
 
                     otherPlayers.Add(player.Id, otherPlayer);
                     this.Controls.Add(otherPlayer);
@@ -407,61 +419,44 @@ namespace AgarioProject
             switch (tempNum)
             {
                 case 1:
-                    obj.Image = Properties.Resources.Violet;
+                    obj.Image = Bitmap.FromFile("Violet.png");
                     //Bitmap bitmap0 = new Bitmap(obj.Image);
                     //var bt = MakeTransparent(bitmap0, Color.White, 100);
                     //pictureBox1.Image = bt;
                     break;
                 case 2:
-                    obj.Image = Properties.Resources.Red;
+                    obj.Image = Bitmap.FromFile("Red.png");
                     //Bitmap bitmap1 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap1, Color.White, 100);
                     break;
                 case 3:
-                    obj.Image = Properties.Resources.Yellow;
+                    obj.Image = Bitmap.FromFile("Yellow.png");
                     //Bitmap bitmap2 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap2, Color.White, 100);
                     break;
                 case 4:
-                    obj.Image = Properties.Resources.Blue;
+                    obj.Image = Bitmap.FromFile("Blue.png");
                     //Bitmap bitmap3 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap3, Color.White, 100);
                     break;
                 case 5:
-                    obj.Image = Properties.Resources.Green;
+                    obj.Image = Bitmap.FromFile("Green.png");
                     //Bitmap bitmap4 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap4, Color.White, 100);
                     break;
                 case 6:
-                    obj.Image = Properties.Resources.Orange;
+                    obj.Image = Bitmap.FromFile("Orange.png");
                     //Bitmap bitmap5 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap5, Color.White, 100);
                     break;
 
                 default:
-                    obj.Image = Properties.Resources.Blue;
+                    obj.Image = Bitmap.FromFile("Violet.png");
                     //Bitmap bitmap6 = new Bitmap(obj.Image);
                     //MakeTransparent(bitmap6, Color.White, 100);
                     break;
             }
         }
-
-        //private void SpawnDots()
-        //{
-        //    PictureBox new_dot = new PictureBox();
-        //    new_dot.Height = 10;
-        //    new_dot.Width = 10;
-        //    new_dot.BackColor = colors[random.Next(0, colors.Length)];
-
-        //    x = random.Next(0, this.ClientSize.Width - new_dot.Width);
-        //    y = random.Next(0, this.ClientSize.Height - new_dot.Height);
-
-        //    new_dot.Location = new Point(x, y);
-
-        //    dots.Add(new_dot);
-        //    this.Controls.Add(new_dot);
-
-        //}
 
         private void pictureBox1_Click(object sender, EventArgs e)
         {
