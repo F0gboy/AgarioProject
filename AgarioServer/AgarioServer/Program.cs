@@ -122,6 +122,7 @@ public class Server
     }
 
 
+
     private static void HandlePlayerCollisions(PlayerInfo currentPlayer)
     {
         List<Guid> eatenPlayers = new List<Guid>();
@@ -130,33 +131,48 @@ public class Server
         {
             if (otherPlayer.Id == currentPlayer.Id) continue; // Skip if it's the same player
 
-            // Calculate distance between players
-            int distanceX = Math.Abs((currentPlayer.X + (currentPlayer.Size / 2)) - (otherPlayer.X + (otherPlayer.Size / 2)));
-            int distanceY = Math.Abs((currentPlayer.Y + (currentPlayer.Size / 2)) - (otherPlayer.Y + (otherPlayer.Size / 2)));
+            // Calculate distance between currentPlayer and otherPlayer
+            int deltaX = (currentPlayer.X + (currentPlayer.Size / 2)) - (otherPlayer.X + (otherPlayer.Size / 2));
+            int deltaY = (currentPlayer.Y + (currentPlayer.Size / 2)) - (otherPlayer.Y + (otherPlayer.Size / 2));
 
-            // Using Pythagorean theorem to calculate distance
-            double distance = Math.Sqrt(Math.Pow(distanceX, 2) + Math.Pow(distanceY, 2)) - (currentPlayer.Size / 2);
+            double distance = Math.Sqrt(deltaX * deltaX + deltaY * deltaY);
 
-            // If player collides and is bigger than the other player, "eat" them
-            if (distance < -5 && currentPlayer.Size > otherPlayer.Size)
+            // Check if they collide and currentPlayer is larger
+            if (distance < (currentPlayer.Size / 2) && currentPlayer.Size > otherPlayer.Size)
             {
-                // Log the player getting eaten
-                Console.WriteLine($"Player {currentPlayer.Id} ate player {otherPlayer.Id}");
+                // The currentPlayer is larger and eats the otherPlayer
+                Console.WriteLine($"Player {currentPlayer.Id} (size {currentPlayer.Size}) eats player {otherPlayer.Id} (size {otherPlayer.Size})");
 
-                // Add the eaten player to the list
+                // Add the otherPlayer to the list for removal (the smaller player gets eaten)
                 eatenPlayers.Add(otherPlayer.Id);
 
-                // Increase the current player's size based on the size of the eaten player
+                // Increase the size of the current player (gain the size of the eaten player)
                 currentPlayer.Size += otherPlayer.Size;
+            }
+            else if (distance < (otherPlayer.Size / 2) && otherPlayer.Size > currentPlayer.Size)
+            {
+                // The otherPlayer is larger and eats the currentPlayer
+                Console.WriteLine($"Player {otherPlayer.Id} (size {otherPlayer.Size}) eats player {currentPlayer.Id} (size {currentPlayer.Size})");
+
+                // Add the currentPlayer to the list for removal (currentPlayer gets eaten)
+                eatenPlayers.Add(currentPlayer.Id);
+
+                // Increase the size of the other player (gain the size of the current player)
+                otherPlayer.Size += currentPlayer.Size;
+
+                // Since the currentPlayer got eaten, we should break the loop early
+                break;
             }
         }
 
-        // Remove eaten players
+        // Remove the players who got eaten
         foreach (var playerId in eatenPlayers)
         {
             DisconnectPlayer(playerId);  // Disconnect the eaten player
         }
     }
+
+
 
 
     private static Guid GetClientId(TcpClient client)
@@ -168,33 +184,34 @@ public class Server
     {
         if (playerStates.ContainsKey(playerId))
         {
-            // Remove player from the playerStates dictionary
+            // Remove player from the game state
             playerStates.Remove(playerId);
+            Console.WriteLine($"Player {playerId} has been removed from the game.");
         }
 
-        // Find the corresponding TcpClient in allClients and close it
-        var client = allClients.FirstOrDefault(c =>
+        // Find the corresponding client and disconnect
+        TcpClient clientToRemove = allClients.FirstOrDefault(c =>
         {
             var stream = c.GetStream();
             StreamReader reader = new StreamReader(stream);
             StreamWriter writer = new StreamWriter(stream);
             var playerInfo = playerStates.Values.FirstOrDefault(p => p.Id == playerId);
-            return playerInfo != null && playerId == playerInfo.Id;
+            return playerInfo != null && playerInfo.Id == playerId;
         });
 
-        if (client != null)
+        if (clientToRemove != null)
         {
-            allClients.Remove(client);  // Remove the TcpClient from the list
-            client.Close();             // Close the TcpClient connection
-            client.Dispose();           // Dispose of it to free resources
+            allClients.Remove(clientToRemove);  // Remove the client from the list
+            clientToRemove.Close();             // Close the connection
+            clientToRemove.Dispose();           // Clean up resources
+            Console.WriteLine($"Player {playerId} has been disconnected.");
         }
 
-        // Log player disconnection for debugging purposes
-        Console.WriteLine($"Player {playerId} has been disconnected after being eaten.");
-
-        // Optionally, broadcast the update to all other players
+        // Optionally, broadcast updated player list to other players
         BroadcastPlayerStatesAndDots();
     }
+
+
 
 
 
