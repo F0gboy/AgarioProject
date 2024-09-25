@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using System.Drawing;
 
 public class Server
 {
@@ -25,7 +26,7 @@ public class Server
         broadcastTimer.Start();
 
         // Start another timer to spawn dots periodically
-        System.Timers.Timer spawnDotsTimer = new System.Timers.Timer(2000); // Spawn dots every 2 seconds
+        System.Timers.Timer spawnDotsTimer = new System.Timers.Timer(1000); // Spawn dots every 2 seconds
         spawnDotsTimer.Elapsed += (sender, e) => SpawnDots();
         spawnDotsTimer.Start();
 
@@ -42,7 +43,7 @@ public class Server
         lock (dots)
         {
             // Check if the maximum number of dots has been reached
-            if (dots.Count < 20) // Limit to 20 dots, for example
+            if (dots.Count < 200) // Limit to 20 dots, for example
             {
                 // Spawn a new dot with random location and size
                 DotInfo newDot = new DotInfo
@@ -67,6 +68,7 @@ public class Server
             }
         }
     }
+    
 
     private static void HandleClient(TcpClient client)
     {
