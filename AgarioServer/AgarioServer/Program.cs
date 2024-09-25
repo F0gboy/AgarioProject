@@ -76,11 +76,6 @@ public class Server
         StreamWriter writer = new StreamWriter(client.GetStream());
         StreamReader reader = new StreamReader(client.GetStream());
 
-        // Request and receive player's name (optional)
-        //writer.WriteLine("What is your name?");
-        //writer.Flush();
-        //string name = reader.ReadLine();  // For now, you can ignore this, or use it later for displaying player names
-
         try
         {
             while (client.Connected)
@@ -103,6 +98,12 @@ public class Server
                         playerStates.Add(clientId, playerData);
                     }
 
+                    // Handle dot collisions
+                    HandleDotCollisions(playerData);
+
+                    // Handle player collisions
+                    HandlePlayerCollisions(playerData);
+
                     // Broadcast updated player states to all clients
                     BroadcastPlayerStatesAndDots();
                 }
@@ -117,6 +118,119 @@ public class Server
             Console.WriteLine($"Client disconnected: {clientId}");
             client.Dispose();
             playerStates.Remove(clientId);
+        }
+    }
+
+
+    private static void HandlePlayerCollisions(PlayerInfo currentPlayer)
+    {
+        List<Guid> eatenPlayers = new List<Guid>();
+
+        foreach (var otherPlayer in playerStates.Values)
+        {
+            if (otherPlayer.Id == currentPlayer.Id) continue; // Skip if it's the same player
+
+            // Calculate distance between players
+            int distanceX = Math.Abs((currentPlayer.X + (currentPlayer.Size / 2)) - (otherPlayer.X + (otherPlayer.Size / 2)));
+            int distanceY = Math.Abs((currentPlayer.Y + (currentPlayer.Size / 2)) - (otherPlayer.Y + (otherPlayer.Size / 2)));
+
+            // Using Pythagorean theorem to calculate distance
+            double distance = Math.Sqrt(Math.Pow(distanceX, 2) + Math.Pow(distanceY, 2)) - (currentPlayer.Size / 2);
+
+            // If player collides and is bigger than the other player, "eat" them
+            if (distance < -5 && currentPlayer.Size > otherPlayer.Size)
+            {
+                // Log the player getting eaten
+                Console.WriteLine($"Player {currentPlayer.Id} ate player {otherPlayer.Id}");
+
+                // Add the eaten player to the list
+                eatenPlayers.Add(otherPlayer.Id);
+
+                // Increase the current player's size based on the size of the eaten player
+                currentPlayer.Size += otherPlayer.Size;
+            }
+        }
+
+        // Remove eaten players
+        foreach (var playerId in eatenPlayers)
+        {
+            DisconnectPlayer(playerId);  // Disconnect the eaten player
+        }
+    }
+
+
+    private static Guid GetClientId(TcpClient client)
+    {
+        return playerStates.FirstOrDefault(x => allClients.Contains(client)).Key;
+    }
+
+    private static void DisconnectPlayer(Guid playerId)
+    {
+        if (playerStates.ContainsKey(playerId))
+        {
+            // Remove player from the playerStates dictionary
+            playerStates.Remove(playerId);
+        }
+
+        // Find the corresponding TcpClient in allClients and close it
+        var client = allClients.FirstOrDefault(c =>
+        {
+            var stream = c.GetStream();
+            StreamReader reader = new StreamReader(stream);
+            StreamWriter writer = new StreamWriter(stream);
+            var playerInfo = playerStates.Values.FirstOrDefault(p => p.Id == playerId);
+            return playerInfo != null && playerId == playerInfo.Id;
+        });
+
+        if (client != null)
+        {
+            allClients.Remove(client);  // Remove the TcpClient from the list
+            client.Close();             // Close the TcpClient connection
+            client.Dispose();           // Dispose of it to free resources
+        }
+
+        // Log player disconnection for debugging purposes
+        Console.WriteLine($"Player {playerId} has been disconnected after being eaten.");
+
+        // Optionally, broadcast the update to all other players
+        BroadcastPlayerStatesAndDots();
+    }
+
+
+
+
+    private static void HandleDotCollisions(PlayerInfo player)
+    {
+        lock (dots)
+        {
+            var eatenDots = new List<DotInfo>();
+
+            foreach (var dot in dots)
+            {
+                // Calculate the distance between the player and the dot
+                int x3 = Math.Abs((player.X + (player.Size / 2)) - dot.X);
+                int y3 = Math.Abs((player.Y + (player.Size / 2)) - dot.Y);
+
+                // Using Pythagorean theorem to calculate the distance
+                double distance = Math.Sqrt(Math.Pow(x3, 2) + Math.Pow(y3, 2)) - (player.Size / 2);
+
+                // If the player is close enough to "eat" the dot (within the radius)
+                if (distance < -5)
+                {
+                    // Add dot to eaten list and increase player size
+                    eatenDots.Add(dot);
+                    player.Size += 1;
+                       
+                    // Log for debugging
+                    Console.WriteLine($"Player {player.Id} ate dot at ({dot.X}, {dot.Y})");
+                }
+            }
+
+            // Remove all eaten dots from the game
+            foreach (var dot in eatenDots)
+            {
+                dots.Remove(dot);
+            }
         }
     }
 
@@ -140,7 +254,7 @@ public class Server
                     try
                     {
                         StreamWriter writer = new StreamWriter(client.GetStream());
-                        writer.WriteLine(broadcastJson);
+                        writer.WriteLine(broadcastJson);  // Sending all players' states including their size
                         writer.Flush();
                     }
                     catch (Exception ex)
@@ -151,6 +265,7 @@ public class Server
             }
         }
     }
+
 
     private static void MessageAll(string message)
     {

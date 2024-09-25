@@ -358,19 +358,15 @@ namespace AgarioProject
             // Broadcast player position and size to the server
             BroadcastInfo();
 
-            spawnTimer--;
-            //if (spawnTimer < 1)
-            //{
-            //    SpawnDots();
-            //    spawnTimer = 10;
-            //}
-
             foreach (PictureBox item in dots.ToList())
             {
                 if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
                 {
                     dots.Remove(item);
                     this.Controls.Remove(item);
+
+                    // Expand the player when it consumes a dot
+                    Expand(pictureBox1, 1); // Example increment of 5 units in size
                 }
             }
         }
@@ -401,6 +397,52 @@ namespace AgarioProject
                     new Point(
                         pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
+            }
+        }
+
+        private void RandomColor(PictureBox obj)
+        {
+
+            int tempNum = random.Next(1, 7);
+            switch (tempNum)
+            {
+                case 1:
+                    obj.Image = Properties.Resources.Violet;
+                    //Bitmap bitmap0 = new Bitmap(obj.Image);
+                    //var bt = MakeTransparent(bitmap0, Color.White, 100);
+                    //pictureBox1.Image = bt;
+                    break;
+                case 2:
+                    obj.Image = Properties.Resources.Red;
+                    //Bitmap bitmap1 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap1, Color.White, 100);
+                    break;
+                case 3:
+                    obj.Image = Properties.Resources.Yellow;
+                    //Bitmap bitmap2 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap2, Color.White, 100);
+                    break;
+                case 4:
+                    obj.Image = Properties.Resources.Blue;
+                    //Bitmap bitmap3 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap3, Color.White, 100);
+                    break;
+                case 5:
+                    obj.Image = Properties.Resources.Green;
+                    //Bitmap bitmap4 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap4, Color.White, 100);
+                    break;
+                case 6:
+                    obj.Image = Properties.Resources.Orange;
+                    //Bitmap bitmap5 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap5, Color.White, 100);
+                    break;
+
+                default:
+                    obj.Image = Properties.Resources.Blue;
+                    //Bitmap bitmap6 = new Bitmap(obj.Image);
+                    //MakeTransparent(bitmap6, Color.White, 100);
+                    break;
             }
         }
 
