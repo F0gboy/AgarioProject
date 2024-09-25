@@ -370,17 +370,17 @@ namespace AgarioProject
             // Broadcast player position and size to the server
             BroadcastInfo();
 
-            foreach (PictureBox item in dots.ToList())
-            {
-                if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
-                {
-                    dots.Remove(item);
-                    this.Controls.Remove(item);
+            //foreach (PictureBox item in dots.ToList())
+            //{
+            //    if (pictureBox1.Bounds.IntersectsWith(item.Bounds))
+            //    {
+            //        dots.Remove(item);
+            //        this.Controls.Remove(item);
 
-                    // Expand the player when it consumes a dot
-                    Expand(pictureBox1, 1); // Example increment of 5 units in size
-                }
-            }
+            //        // Expand the player when it consumes a dot
+            //        Expand(pictureBox1, 1); // Example increment of 5 units in size
+            //    }
+            //}
         }
 
         private void BroadcastInfo()
