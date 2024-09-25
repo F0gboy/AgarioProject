@@ -212,10 +212,6 @@ public class Server
     }
 
 
-
-
-
-
     private static void HandleDotCollisions(PlayerInfo player)
     {
         lock (dots)
