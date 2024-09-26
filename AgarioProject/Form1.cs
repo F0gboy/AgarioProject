@@ -12,6 +12,7 @@ namespace AgarioProject
 
         public Random random = new Random();
         public List<PictureBox> dots = new List<PictureBox>();
+        public List<PictureBox> enemys = new List<PictureBox>();
 
         public int x;
         public int y;
@@ -35,7 +36,13 @@ namespace AgarioProject
             public int Y { get; set; }
             public int Size { get; set; }
         }
-
+        public class EnemyInfo
+        {
+            public int X { get; set; }
+            public int Y { get; set; }
+            public int Size { get; set; }
+            public Color Color { get; set; }
+        }
 
         public TcpClient client;
         private StreamWriter writer;
@@ -130,6 +137,7 @@ namespace AgarioProject
                             // Update player states and dots in the UI
                             UpdatePlayerStates(receivedData.Players);
                             UpdateDots(receivedData.Dots); // New method to handle dots
+                            UpdateEnemy(receivedData.Enemy);
                         }
                     }
                     catch (Exception ex)
@@ -146,8 +154,73 @@ namespace AgarioProject
         {
             public List<PlayerInfo> Players { get; set; }
             public List<DotInfo> Dots { get; set; }
+            public List<EnemyInfo> Enemy { get; set; }
+
         }
 
+        private void UpdateEnemy(List<EnemyInfo> serverEnemy)
+        {
+            if (this.InvokeRequired)
+            {
+                this.Invoke((MethodInvoker)delegate
+                {
+                    UpdateEnemy(serverEnemy);
+                });
+                return;
+            }
+
+            // Keep track of which dots from the server are new
+            var enemyIds = new HashSet<string>();
+
+            // Update existing dots or add new ones if they don't exist
+            foreach (var enemyInfo in serverEnemy)
+            {
+                // Create a unique identifier for the dot based on its position
+                string enemyId = $"{enemyInfo.X}_{enemyInfo.Y}";
+                enemyIds.Add(enemyId);
+
+                // Find if a dot with the same position and size already exists
+                var existingDot = dots.FirstOrDefault(d =>
+                    d.Location.X == enemyInfo.X &&
+                    d.Location.Y == enemyInfo.Y &&
+                    d.Width == enemyInfo.Size &&
+                    d.Height == enemyInfo.Size);
+
+                if (existingDot != null)
+                {
+                    // Dot already exists, just update its properties if needed (color, etc.)
+                    //existingDot.BackColor = colors[random.Next(0, colors.Length)];
+                }
+                else
+                {
+                    // Create new dot and add it to the form and list
+                    PictureBox newEnemy = new PictureBox
+                    {
+                        Width = enemyInfo.Size,
+                        Height = enemyInfo.Size,
+                        Location = new Point(enemyInfo.X, enemyInfo.Y),
+                        BackColor = Color.Black // Random color for variety
+                    };
+
+                    this.Controls.Add(newEnemy);
+                    enemys.Add(newEnemy);
+                }
+            }
+
+            //// Remove dots that no longer exist on the server
+            //foreach (var existingDot in dots.ToList())
+            //{
+            //    // Create a unique identifier for the dot based on its position
+            //    string existingDotId = $"{existingDot.Location.X}_{existingDot.Location.Y}_{existingDot.Width}";
+
+            //    if (!dotIds.Contains(existingDotId))
+            //    {
+            //        // If the dot no longer exists on the server, remove it from the form and list
+            //        this.Controls.Remove(existingDot);
+            //        dots.Remove(existingDot);
+            //    }
+            //}
+        }
         private void UpdateDots(List<DotInfo> serverDots)
         {
             if (this.InvokeRequired)
@@ -280,12 +353,9 @@ namespace AgarioProject
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            //while (true)
-            //{
+            
 
-            //}
-
-            PictureBox asd = new PictureBox();
+            
         }
 
         private void Expand(PictureBox obj, int amount)
