@@ -66,7 +66,19 @@ namespace Chat
             button1.Text = "Send";
             button1.UseVisualStyleBackColor = true;
             button1.Click += button1_Click;
-            
+            // 
+            // ChatForm
+            // 
+            AutoScaleDimensions = new SizeF(10F, 25F);
+            AutoScaleMode = AutoScaleMode.Font;
+            ClientSize = new Size(393, 577);
+            Controls.Add(button1);
+            Controls.Add(richTextBox2);
+            Controls.Add(richTextBox1);
+            Name = "ChatForm";
+            //Text = $"Chat";
+            Load += ChatForm_Load;
+            ResumeLayout(false);
         }
 
         #endregion

@@ -4,6 +4,9 @@ using System.Threading.Tasks;
 using System.Collections.Generic;
 using System.IO;
 using Newtonsoft.Json;
+using System.Drawing;
+using System;
+using System.Reflection;
 
 public class Server
 {
@@ -11,6 +14,7 @@ public class Server
     static List<TcpClient> allClients = new List<TcpClient>();
 
     private static List<DotInfo> dots = new List<DotInfo>(); // Store dots
+    private static List<EnemyInfo> enemy = new List<EnemyInfo>();
     private static Random random = new Random();
 
     private static void Main()
@@ -25,9 +29,13 @@ public class Server
         broadcastTimer.Start();
 
         // Start another timer to spawn dots periodically
-        System.Timers.Timer spawnDotsTimer = new System.Timers.Timer(2000); // Spawn dots every 2 seconds
+        System.Timers.Timer spawnDotsTimer = new System.Timers.Timer(1000); // Spawn dots every 2 seconds
         spawnDotsTimer.Elapsed += (sender, e) => SpawnDots();
         spawnDotsTimer.Start();
+        for (int i = 0; i < 5; i++)
+        {
+            EnemySpawn();
+        }
 
         while (true)
         {
@@ -42,7 +50,7 @@ public class Server
         lock (dots)
         {
             // Check if the maximum number of dots has been reached
-            if (dots.Count < 20) // Limit to 20 dots, for example
+            if (dots.Count < 200) // Limit to 20 dots, for example
             {
                 // Spawn a new dot with random location and size
                 DotInfo newDot = new DotInfo
@@ -65,6 +73,22 @@ public class Server
                     dot.Size = random.Next(10, 20);
                 }
             }
+        }
+    }
+    private static void EnemySpawn()
+    {
+        lock (enemy)
+        {
+            EnemyInfo new_enemy = new EnemyInfo
+            {
+                X = random.Next(0, 1000),
+                Y = random.Next(0, 1000),
+                Size = 50,
+                Color = Color.Black
+            };
+            enemy.Add(new_enemy);
+            // Log for debugging
+            Console.WriteLine($"Enemy spawned at ({new_enemy.X}, {new_enemy.Y})");
         }
     }
 
@@ -255,7 +279,8 @@ public class Server
             var broadcastData = new
             {
                 Players = playerStates.Values.ToList(),
-                Dots = dots.Select(dot => new { dot.X, dot.Y, dot.Size }).ToList() // Prepare for serialization
+                Dots = dots.Select(dot => new { dot.X, dot.Y, dot.Size }).ToList(), // Prepare for serialization
+                Enemy = enemy.Select(enemy => new {enemy.X, enemy.Y}).ToList()
             };
 
             string broadcastJson = JsonConvert.SerializeObject(broadcastData);
@@ -299,4 +324,11 @@ public class DotInfo
     public int X { get; set; }
     public int Y { get; set; }
     public int Size { get; set; }
+}
+public class EnemyInfo
+{
+    public int X { get; set; }
+    public int Y { get; set; }
+    public int Size { get; set; }
+    public Color Color { get; set; }
 }
