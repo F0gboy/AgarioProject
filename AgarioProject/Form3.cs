@@ -37,7 +37,7 @@ namespace AgarioProject
             Form1 form1 = new Form1();
             ChatForm chatForm = new ChatForm(ipAddress);  // Pass the IP to ChatForm
             form1.Show();
-            chatForm.ShowDialog();
+            chatForm.Show();
          
 
             this.Close();
