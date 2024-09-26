@@ -53,21 +53,7 @@ namespace AgarioProject
         {
             InitializeComponent();
 
-            // Initialize player ID
-            InitializePlayer();
 
-            // Initialize and connect to the server
-            client = new TcpClient();
-            client.Connect("localhost", 12000);
-
-            // Initialize the writer to send messages to the server
-            writer = new StreamWriter(client.GetStream());
-            reader = new StreamReader(client.GetStream());
-
-            // Start a new thread to receive messages from the server
-            receiveThread = new Thread(ReceivePlayerStates);
-            receiveThread.IsBackground = true;
-            receiveThread.Start();
         }
 
 
@@ -81,6 +67,41 @@ namespace AgarioProject
 
         }
 
+        public void Start(string ip)
+        {
+            try
+            {
+
+                // Initialize and connect to the server
+                client = new TcpClient();
+                client.Connect(ip, 12000);
+
+                pictureBox1.Visible = true;
+                textBox1.Visible = false;
+                button1.Visible = false;
+                button2.Visible = false;
+                label1.Visible = false;
+
+                // Initialize player ID
+                InitializePlayer();
+
+                // Initialize the writer to send messages to the server
+                writer = new StreamWriter(client.GetStream());
+                reader = new StreamReader(client.GetStream());
+
+                // Start a new thread to receive messages from the server
+                receiveThread = new Thread(ReceivePlayerStates);
+                receiveThread.IsBackground = true;
+                receiveThread.Start();
+                timer1.Enabled = true;
+            }
+            catch (Exception)
+            {
+                Console.WriteLine("Wrong IP");
+                //throw;
+            }
+           
+        }
 
         private void StartSendingPlayerUpdates()
         {
@@ -288,7 +309,7 @@ namespace AgarioProject
 
         private void UpdatePlayerStates(List<PlayerInfo> players)
         {
-            
+
             if (this.InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -339,7 +360,7 @@ namespace AgarioProject
                     otherPlayers.Add(player.Id, otherPlayer);
                     this.Controls.Add(otherPlayer);
                 }
-                
+
             }
 
             // Remove any PictureBoxes for players that are no longer in the game
@@ -370,7 +391,7 @@ namespace AgarioProject
 
         private void Form1_Load(object sender, EventArgs e)
         {
-        
+
         }
 
         private void Expand(PictureBox obj, int amount)
@@ -547,6 +568,16 @@ namespace AgarioProject
                     //MakeTransparent(bitmap6, Color.White, 100);
                     break;
             }
+        }
+
+        private void button1_Click(object sender, EventArgs e)
+        { 
+            Start(textBox1.Text);
+        }
+
+        private void button2_Click(object sender, EventArgs e)
+        {
+            Start("localhost");
         }
     }
 }
