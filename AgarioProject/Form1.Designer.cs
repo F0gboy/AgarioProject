@@ -47,7 +47,6 @@
             pictureBox1.SizeMode = PictureBoxSizeMode.StretchImage;
             pictureBox1.TabIndex = 0;
             pictureBox1.TabStop = false;
-            pictureBox1.Click += pictureBox1_Click_1;
             // 
             // timer1
             // 
@@ -66,11 +65,11 @@
             AutoScaleDimensions = new SizeF(7F, 15F);
             AutoScaleMode = AutoScaleMode.Font;
             BackColor = Color.White;
-            ClientSize = new Size(861, 721);
+            ClientSize = new Size(984, 961);
             Controls.Add(pictureBox1);
             Margin = new Padding(3, 2, 3, 2);
-            MaximumSize = new Size(877, 760);
-            MinimumSize = new Size(877, 760);
+            MaximumSize = new Size(1000, 1000);
+            MinimumSize = new Size(877, 1000);
             Name = "Form1";
             Text = "EOH";
             Load += Form1_Load;

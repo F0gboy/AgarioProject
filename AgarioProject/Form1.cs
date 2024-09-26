@@ -70,6 +70,7 @@ namespace AgarioProject
             myPlayerId = Guid.NewGuid();
 
             RandomColor(pictureBox1);
+            pictureBox1.Paint += OtherPlayer_Paint;
 
         }
 
@@ -214,6 +215,7 @@ namespace AgarioProject
 
         private void UpdatePlayerStates(List<PlayerInfo> players)
         {
+            
             if (this.InvokeRequired)
             {
                 this.Invoke((MethodInvoker)delegate
@@ -254,7 +256,7 @@ namespace AgarioProject
 
                         //BackColor = Color.Gray // Color for other players
                     };
-
+                    otherPlayer.Paint += OtherPlayer_Paint;
                     RandomColor(otherPlayer);
 
                     otherPlayer.SizeMode = System.Windows.Forms.PictureBoxSizeMode.CenterImage;
@@ -264,6 +266,7 @@ namespace AgarioProject
                     otherPlayers.Add(player.Id, otherPlayer);
                     this.Controls.Add(otherPlayer);
                 }
+                
             }
 
             // Remove any PictureBoxes for players that are no longer in the game
@@ -278,14 +281,23 @@ namespace AgarioProject
             }
         }
 
+        private void OtherPlayer_Paint(object? sender, PaintEventArgs e)
+        {
+            using (Font myFont = new Font("Arial", 14))
+            {
+                e.Graphics.DrawString(
+                    pictureBox1.Width.ToString(),
+                    myFont,
+                    Brushes.Black,
+                    new Point(
+                        pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
+                        pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
+            }
+        }
+
         private void Form1_Load(object sender, EventArgs e)
         {
-            //while (true)
-            //{
-
-            //}
-
-            PictureBox asd = new PictureBox();
+        
         }
 
         private void Expand(PictureBox obj, int amount)
@@ -390,7 +402,7 @@ namespace AgarioProject
             writer.Flush();
         }
 
-        private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        void pbA_Paint(object sender, PaintEventArgs e)
         {
             using (Font myFont = new Font("Arial", 14))
             {
@@ -403,6 +415,20 @@ namespace AgarioProject
                         pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
             }
         }
+
+        //private void pictureBox1_Paint(object sender, PaintEventArgs e)
+        //{
+        //    using (Font myFont = new Font("Arial", 14))
+        //    {
+        //        e.Graphics.DrawString(
+        //            pictureBox1.Width.ToString(),
+        //            myFont,
+        //            Brushes.Black,
+        //            new Point(
+        //                pictureBox1.Width / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Width / 2) + 3,
+        //                pictureBox1.Height / 2 - (TextRenderer.MeasureText(pictureBox1.Width.ToString(), myFont).Height / 2)));
+        //    }
+        //}
 
         private void RandomColor(PictureBox obj)
         {
@@ -448,16 +474,6 @@ namespace AgarioProject
                     //MakeTransparent(bitmap6, Color.White, 100);
                     break;
             }
-        }
-
-        private void pictureBox1_Click(object sender, EventArgs e)
-        {
-
-        }
-
-        private void pictureBox1_Click_1(object sender, EventArgs e)
-        {
-
         }
     }
 }
